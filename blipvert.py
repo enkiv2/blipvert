@@ -62,6 +62,7 @@ for line in sys.stdin.readlines():
 			os.system("mencoder -oac copy -ovc lavc -audiofile temp.wav -o "+str(counter)+".avi temp.avi")
 			os.system("rm -f temp.{wav,txt,png,avi}")
 			films[token]=str(counter)+".avi"
+			counter+=1
 		clips.append(films[token])
 os.system("mencoder -oac copy -ovc copy -o temp.avi "+(" ".join(clips)))
 os.system("mencoder -oac copy -ovc lavc -o blip.avi -speed 5 temp.avi")
