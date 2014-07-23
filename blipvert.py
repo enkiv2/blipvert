@@ -40,16 +40,20 @@ for line in sys.stdin.readlines():
 			for i in [preI, centreI, postI]:
 				clump.blit(i, (x, 0))
 				x+=i.get_width()
-			scale=1
-			if (NTSC[0]/(1.0*clumpWidth) > NTSC[1]/(1.0*clumpHeight)):
-				scale=NTSC[0]/(1.0*clumpWidth)
+			if False:
+				# non-working scaling code
+				scale=1
+				if (NTSC[0]/(1.0*clumpWidth) > NTSC[1]/(1.0*clumpHeight)):
+					scale=NTSC[0]/(1.0*clumpWidth)
+				else:
+					scale=NTSC[1]/(1.0*clumpHeight)
+				if (scale<1):
+					scale=1.0/scale
+				resizedClump=transform.scale(clump, (int(clumpWidth*scale), int(clumpHeight*scale)))
+				mySurf.blit(resizedClump, ((NTSC[0]/2)-(resizedClump.get_height()/2), (NTSC[1]/2)-(resizedClump.get_height()/2)))
 			else:
-				scale=NTSC[1]/(1.0*clumpHeight)
-			if (scale>1):
-				scale=1.0/scale
-			resizedClump=transform.scale(clump, (int(clumpWidth*scale), int(clumpHeight*scale)))
-			mySurf.blit(resizedClump, ((NTSC[0]/2)-(resizedClump.get_height()/2), (NTSC[1]/2)-(resizedClump.get_height()/2)))
-			image.save(mySurf, "temp.png")
+				mySurf.blit(clump, ((NTSC[0]/2)-(clump.get_height()/2), (NTSC[1]/2)-(clump.get_height()/2)))
+			image.save(mySurf, r"temp.png")
 			os.system("rm -f temp.txt")
 			f=open("temp.txt", "w")
 			f.write(token)
@@ -57,7 +61,8 @@ for line in sys.stdin.readlines():
 			os.system("text2wave temp.txt -o temp.wav")
 			s=mixer.Sound("temp.wav")
 			seconds=int(s.get_length()+0.5)
-			cmd="mencoder -oac copy -ovc lavc -o temp.avi -mf fps=1 "+("mf://temp.png"*seconds)
+			if(seconds<1): seconds=1
+			cmd="mencoder -oac copy -ovc lavc -o temp.avi -mf fps=1 "+("mf://temp.png "*seconds)
 			os.system(cmd)
 			os.system("mencoder -oac copy -ovc lavc -audiofile temp.wav -o "+str(counter)+".avi temp.avi")
 			os.system("rm -f temp.{wav,txt,png,avi}")
@@ -65,7 +70,7 @@ for line in sys.stdin.readlines():
 			counter+=1
 		clips.append(films[token])
 os.system("mencoder -oac copy -ovc copy -o temp.avi "+(" ".join(clips)))
-os.system("mencoder -oac copy -ovc lavc -o blip.avi -speed 5 temp.avi")
+os.system("mencoder -oac copy -ovc lavc -o blip.avi -speed 3 temp.avi")
 os.system("rm temp.avi")
 os.system("rm -f "+(" ".join(films.values())))
 
